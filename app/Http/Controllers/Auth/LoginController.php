@@ -7,6 +7,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Auth;
 use DB;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -40,17 +41,16 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    public function loginSSO($email, $page)
+    public function loginSSO($email, $password, $page)
     {
+        /*
         $this->redirectTo = route($page);
-        //check if already login or not login
 
         $userReport = DB::table('koolreport.users')->where( 'email' , $email )->first();
         if ( !$userReport ) {
-            //inject resto
             DB::table('koolreport.users')->insert(
             [
-                'password'          => '$2y$10$RTwvchSwMwAJ628lrTOKEevx5h11iYmDYIEGtoCsLMtGX06Ht.oCa',
+                'password'          => Hash::make($password),
                 'name'              => $email,
                 'email'             => $email,
                 'created_at'        => date('Y-m-d H:i:s'),
@@ -64,18 +64,17 @@ class LoginController extends Controller
             if($email!=$login_email){
                 Auth::logout();
                 $get_email = $email;
-                //echo "dif";
-                return view('auth.loginsso')->with('email', $get_email)->with('page', $page);
+                return view('auth.loginsso')->with('email', $get_email)->with('page', $page)->with('password', $password);
             }
             else{
                 return redirect()->route($page);
-                //echo "same";
             }
         }
         else{
             
             $get_email = $email;
-            return view('auth.loginsso')->with('email', $get_email)->with('page', $page);
+            return view('auth.loginsso')->with('email', $get_email)->with('page', $page)->with('password', $password);
         }
+        */
     }
 }

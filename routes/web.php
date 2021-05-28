@@ -37,4 +37,5 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/loginsso/{email}/{page}',[App\Http\Controllers\Auth\LoginController::class, 'loginsso'])->name('loginsso');
+//Route::get('/loginsso/{email}/{password}/{page}',[App\Http\Controllers\Auth\LoginController::class, 'loginsso'])->name('loginsso');
+Route::get('/loginsso/{email}/{password}/{page}',[App\Http\Controllers\HomeController::class, 'loginsso'])->name('loginsso');
