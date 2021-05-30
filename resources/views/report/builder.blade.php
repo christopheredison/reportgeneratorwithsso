@@ -82,11 +82,15 @@
               <select class="form-control" name="database" id="database">
                 @if(!$editMode)
                   @foreach ($databases as $database)
+                    @if($database!="portal")
                     <option value="{{ $database }}" {{ $editMode && $database === 'world' ? 'selected' : '' }}>{{ $database }}</option>
+                    @endif
                   @endforeach
                 @else
                   @foreach ($databases as $database)
+                  @if($database!="portal")
                     <option value="{{ $database }}" {{ $editMode && $database === $data['database'] ? 'selected' : '' }}>{{ $database }}</option>
+                  @endif
                   @endforeach
                 @endif
               </select>

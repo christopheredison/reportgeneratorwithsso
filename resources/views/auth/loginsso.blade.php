@@ -1,14 +1,12 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container">
+Please wait....
+<div class="container" style="display:none;">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">{{ __('Login') }}</div>
 
                 <div class="card-body">
-                    Please wait....
+                    
                     <form id="myform" name="myform" method="POST" action="{{ route('login') }}" style="display:none;">
                         @csrf
 
@@ -74,4 +72,3 @@
 <script>
     document.myform.submit();
 </script>
-@endsection

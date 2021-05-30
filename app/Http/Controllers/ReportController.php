@@ -587,10 +587,10 @@ class ReportController extends BaseController
         $user_email = Auth::user()->email;
         //echo $user_email; 
         //get all sensor id by user
-        $users = DB::TABLE("bapdatajm.users")->where('email', $user_email)->first();
+        $users = DB::connection('portal')->TABLE("users")->where('email', $user_email)->first();
         $user_id = $users->id;
 
-        $sensors = DB::SELECT("SELECT id FROM bapdatajm.sensors WHERE user_id ='".$user_id."'");
+        $sensors = DB::connection('portal')->SELECT("SELECT id FROM sensors WHERE user_id ='".$user_id."'");
 
         //var_dump($sensors);
 
