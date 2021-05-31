@@ -651,8 +651,27 @@ class ReportController extends BaseController
       return ['result' => $result, 'query' => $query];
     }
     elseif ($request->query_type === 'text') {
-      $result = DB::connection($request->database)->select($request->query_input);
+
+      $query_input = $request->query_input;
+      $result = array();
+      if (preg_match("/^Update/i", $query_input)) {
+        //$result[] = "";
+        //echo "found update";
+        //return $result;
+      }
+      else if (preg_match("/^Delete/i", $query_input)) {
+        //$result[] = "";
+        //return $result;
+        //echo "found delete";
+      } 
+      else {
+        $result = DB::connection($request->database)->select($request->query_input);
+        return (array) $result[0];
+        //echo "is okay";
+      }
+
       return (array) $result[0];
+      
     }
   }
 
