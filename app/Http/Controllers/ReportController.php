@@ -21,15 +21,6 @@ use Auth;
 
 class ReportController extends BaseController
 {
-  /**
-   * Create a new controller instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-      $this->middleware('auth');
-  }
 
   /**
    * Show the application dashboard.
@@ -38,7 +29,7 @@ class ReportController extends BaseController
    */
   public function index(Request $request)
   {
-    $user_id = Auth::user()->id;
+    $user_id = $request->user()->id;
     $data = [];
     if ($_GET) {
       $conditions = [];
@@ -350,7 +341,7 @@ class ReportController extends BaseController
   public function store(Request $request)
   {
     //update insert user_id
-    $user_id = Auth::user()->id;
+    $user_id = $request->user()->id;
 
     $validatedData = $request->validate([
       'title' => 'required|string|unique:reports|max:150',
@@ -584,7 +575,7 @@ class ReportController extends BaseController
       
       
       if($database=="vision_report"){
-        $user_email = Auth::user()->email;
+        $user_email = $request->user()->email;
         //echo $user_email; 
         //get all sensor id by user
         $users = DB::connection('portal')->TABLE("users")->where('email', $user_email)->first();
