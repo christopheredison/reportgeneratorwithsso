@@ -30,7 +30,7 @@ class HomeController extends Controller
         //return redirect('reports');
         //$user_id = Auth::user()->id;
         //echo $user_id;
-        echo "welcome " . $request->user()->name;
+        return view('home');
     }
 
     public function loginSSO($email, $password, $page)
