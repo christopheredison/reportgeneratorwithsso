@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\OnedriveController;
 use App\Http\Controllers\AuthSSO;
+use App\Http\Controllers\DatabaseSetting;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,12 @@ Route::middleware(['auth_sso'])->group(function() {
 	Route::put('/reports/{id}', [ReportController::class, 'update']);
 	Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
 	Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+	Route::prefix('setting')->group(function () {
+		Route::get('database/test-connection', [DatabaseSetting::class, 'testConnection'])->name('database.test_connection');
+		Route::get('database/get-table', [DatabaseSetting::class, 'getAvailableTable'])->name('database.get_table');
+		Route::apiResource('database', DatabaseSetting::class);
+	});
 });
 
 Route::get('login',[AuthSSO::class, 'login'])->name('login');

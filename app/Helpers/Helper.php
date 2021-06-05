@@ -34,4 +34,34 @@ class Helper
             return redirect()->away(config('global.onedrive.sign_in_url') . '?client_id=' . config('global.onedrive.client_id') . '&scope=files.read&response_type=token&redirect_uri=' . config('global.onedrive.redirect_uri'));
         }
     }
+
+    /**
+     * Test database connection
+     * @param  string $driver   Database driver (mysql/sqlsrv)
+     * @param  string $host     Database Server host
+     * @param  string $port     Database Server port
+     * @param  string $database Database name
+     * @param  string $username Database Account Username
+     * @param  string $password Database Account Password
+     * @return bool             true if valid, otherwise false
+     */
+    public static function testDatabaseConnection($driver, $host, $port, $database, $username, $password) : bool
+    {
+        return true;
+    }
+
+    /**
+     * Get list table from specific connection
+     * @param  string $driver   Database driver (mysql/sqlsrv)
+     * @param  string $host     Database Server host
+     * @param  string $port     Database Server port
+     * @param  string $database Database name
+     * @param  string $username Database Account Username
+     * @param  string $password Database Account Password
+     * @return array            array of table name
+     */
+    public static function getAvailableTable($driver, $host, $port, $database, $username, $password) : array
+    {
+        return ['apps', 'users', 'transactions'];
+    }
 }

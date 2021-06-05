@@ -11,8 +11,14 @@ try {
     window.$ = window.jQuery = require('jquery');
 
     require('bootstrap');
+    require('datatables.net');
+    require('datatables.net-bs4');
+    require('select2');
+    require('sweetalert');
+    require('block-ui');
 } catch (e) {}
 
+import swal from 'sweetalert';
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
