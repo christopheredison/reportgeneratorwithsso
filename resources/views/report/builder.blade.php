@@ -82,15 +82,11 @@
               <select class="form-control" name="database" id="database">
                 @if(!$editMode)
                   @foreach ($databases as $database)
-                    @if($database!="portal")
-                    <option value="{{ $database }}" {{ $editMode && $database === 'world' ? 'selected' : '' }}>{{ $database }}</option>
-                    @endif
+                    <option value="{{ $database->id }}">{{ $database->name ?: $database->database_name }}</option>
                   @endforeach
                 @else
                   @foreach ($databases as $database)
-                  @if($database!="portal")
-                    <option value="{{ $database }}" {{ $editMode && $database === $data['database'] ? 'selected' : '' }}>{{ $database }}</option>
-                  @endif
+                    <option value="{{ $database->id }}" {{ $database->id === $data['database'] ? 'selected' : '' }}>{{ $database->name ?: $database->database_name }}</option>
                   @endforeach
                 @endif
               </select>
@@ -127,8 +123,9 @@
             <div class="col-md-10">
               <div class="form-group">
                 <label>Select fields:</label>
-                <select name="query_fields[]" class="select2 form-control" id="queryFields" multiple>
-                </select>
+                <div id="select-field-container">
+                  
+                </div>
               </div>
             </div>
             <div class="col-md-2">

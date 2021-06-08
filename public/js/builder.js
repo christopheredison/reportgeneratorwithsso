@@ -664,7 +664,7 @@ function checkQueryType() {
 }
 
 function updateFields() {
-  $('#queryFields').empty();
+  $('#select-field-container').html('');
   let selectedTables = {};
   if ($('.joinTable')[0]) {
     let tables = $('#joinTableContainer').find('select[name*=join_table_]');
@@ -677,13 +677,24 @@ function updateFields() {
     selectedTables[$('#table').val()] = builder.getTableFields($('#table').val());
   }
   builder.setSelectedTables(selectedTables);
+  const html = [];
   $.each(selectedTables, function(table, fields) {
-    let element = $('<optgroup />').attr('label', table);
-    $.each(fields, function() {
-      element.append($('<option />').val(table + '.' + this).text(table + '.' + this));
+    html.push(`<b>${table}</b><div class="row">`);
+    $.each(fields, function(id, field) {
+      html.push(`
+        <div class="col-md-3 col-sm-4">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="${table}.${field}" name="query_fields[]" id="checkboxSelect${id}">
+            <label class="form-check-label" for="checkboxSelect${id}">
+              ${field}
+            </label>
+          </div>
+        </div>
+      `);
     });
-    $('#queryFields').append(element);
+    html.push(`</div>`);
   });
+  $('#select-field-container').html(html.join(''));
   if ($('input[name="data"]')[0]) {
     let data = JSON.parse($('input[name="data"]').val());
     if ('query_fields' in data) {
@@ -738,7 +749,8 @@ async function getQueryBuilderFields() {
     }
   });
 
-  let selectedFields = $('select[name="query_fields[]"]').val();
+  const selectedFields = Object.values($('input[name="query_fields[]"]:checked').map((idx,dom) => $(dom).val())).filter(item => typeof(item) === 'string');
+  // let selectedFields = $('input[name="query_fields[]"]').val();
   if (!selectedFields.length) {
     swal('Warning', 'Please select fields', 'warning');
     isValid = false;

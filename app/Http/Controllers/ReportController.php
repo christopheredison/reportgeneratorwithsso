@@ -7,6 +7,7 @@ use App\Helpers\Helper;
 use App\Models\Report;
 use App\Models\ReportQuery;
 use App\Models\ReportExcel;
+use App\Models\Database;
 
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
@@ -84,7 +85,33 @@ class ReportController extends BaseController
     ];
     if ($report->data_source === 'database') {
       $reportQuery = $report->reportQuery;
-      $reportParams['database'] = $reportQuery->database;
+
+      $dbdata = Database::find($reportQuery->database);
+      if (!$dbdata) {
+        return [
+          'status' => 'fail',
+          'errors' => ['Database not found']
+        ];
+      }
+
+      config([
+          'database.connections.dynamic' => 
+          [
+              'driver'    => $dbdata->database_driver,
+              'host'      => $dbdata->database_host,
+              'port'      => $dbdata->database_port,
+              'database'  => $dbdata->database_name,
+              'username'  => $dbdata->database_username,
+              'password'  => $dbdata->database_password,
+              'charset'   => 'utf8mb4',
+              'collation' => 'utf8mb4_unicode_ci',
+              'options' => [
+                  \PDO::ATTR_EMULATE_PREPARES => true,
+              ],
+          ],
+      ]);
+
+      $reportParams['database'] = 'dynamic';
       $reportParams['query_input'] = $reportQuery->query_input;
     }
     elseif ($report->data_source === 'excel') {
@@ -149,6 +176,34 @@ class ReportController extends BaseController
           ]
         :
           [];
+      if ($reportParams['data_source'] == 'database') {
+        $dbdata = Database::find($reportParams['database_id']);
+        if (!$dbdata) {
+          return [
+            'status' => 'fail',
+            'errors' => ['Database not found']
+          ];
+        }
+
+        config([
+            'database.connections.dynamic' => 
+            [
+                'driver'    => $dbdata->database_driver,
+                'host'      => $dbdata->database_host,
+                'port'      => $dbdata->database_port,
+                'database'  => $dbdata->database_name,
+                'username'  => $dbdata->database_username,
+                'password'  => $dbdata->database_password,
+                'charset'   => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'options' => [
+                    \PDO::ATTR_EMULATE_PREPARES => true,
+                ],
+            ],
+        ]);
+
+        $reportParams['database'] = 'dynamic';
+      }
     }
     elseif ($request->isMethod('get')) {
       $report = Report::find($id);
@@ -188,7 +243,34 @@ class ReportController extends BaseController
       ];
       if ($report->data_source === 'database') {
         $reportQuery = $report->reportQuery;
-        $reportParams['database'] = $reportQuery->database;
+
+        $dbdata = Database::find($reportQuery->database);
+        if (!$dbdata) {
+          return [
+            'status' => 'fail',
+            'errors' => ['Database not found']
+          ];
+        }
+
+        config([
+            'database.connections.dynamic' => 
+            [
+                'driver'    => $dbdata->database_driver,
+                'host'      => $dbdata->database_host,
+                'port'      => $dbdata->database_port,
+                'database'  => $dbdata->database_name,
+                'username'  => $dbdata->database_username,
+                'password'  => $dbdata->database_password,
+                'charset'   => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'options' => [
+                    \PDO::ATTR_EMULATE_PREPARES => true,
+                ],
+            ],
+        ]);
+
+        $reportParams['database'] = 'dynamic';
+        $reportParams['database_id'] = $reportQuery->database;
         $reportParams['query_input'] = $reportQuery->query_input;
       }
       elseif ($report->data_source === 'excel') {
@@ -224,7 +306,8 @@ class ReportController extends BaseController
 
   public function create()
   {
-    return view('report/builder', ['databases' => array_keys(config('database.connections')), 'editMode' => false]);
+    $databases = Database::select('id', 'name', 'database_name')->get();
+    return view('report/builder', ['databases' => $databases, 'editMode' => false]);
   }
 
   public function preview(Request $request)
@@ -246,6 +329,31 @@ class ReportController extends BaseController
           $request->session()->put('return_url', url()->full());
           return redirect()->away(config('global.onedrive.sign_in_url') . '?client_id=' . config('global.onedrive.client_id') . '&scope=files.read&response_type=token&redirect_uri=' . config('global.onedrive.redirect_uri'));
         }
+      } else {
+        $dbdata = Database::find($reportParams['database_id']);
+        if (!$dbdata) {
+          return [
+            'status' => 'fail',
+            'errors' => ['Database not found']
+          ];
+        }
+
+        config([
+            'database.connections.dynamic' => 
+            [
+                'driver'    => $dbdata->database_driver,
+                'host'      => $dbdata->database_host,
+                'port'      => $dbdata->database_port,
+                'database'  => $dbdata->database_name,
+                'username'  => $dbdata->database_username,
+                'password'  => $dbdata->database_password,
+                'charset'   => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'options' => [
+                    \PDO::ATTR_EMULATE_PREPARES => true,
+                ],
+            ],
+        ]);
       }
     }
     elseif ($request->isMethod('post')) {
@@ -260,6 +368,32 @@ class ReportController extends BaseController
             ]
           :
             [];
+        if ($reportParams['data_source'] == 'database') {
+          $dbdata = Database::find($reportParams['database_id']);
+          if (!$dbdata) {
+            return [
+              'status' => 'fail',
+              'errors' => ['Database not found']
+            ];
+          }
+
+          config([
+              'database.connections.dynamic' => 
+              [
+                  'driver'    => $dbdata->database_driver,
+                  'host'      => $dbdata->database_host,
+                  'port'      => $dbdata->database_port,
+                  'database'  => $dbdata->database_name,
+                  'username'  => $dbdata->database_username,
+                  'password'  => $dbdata->database_password,
+                  'charset'   => 'utf8mb4',
+                  'collation' => 'utf8mb4_unicode_ci',
+                  'options' => [
+                      \PDO::ATTR_EMULATE_PREPARES => true,
+                  ],
+              ],
+          ]);
+        }
       }
       else {
         $validatedData = $request->validate([
@@ -304,7 +438,33 @@ class ReportController extends BaseController
           'action'=>'show'
         ];
         if ($request->data_source === 'database') {
-          $reportParams['database'] = $request->database;
+          $dbdata = Database::find($request->database);
+          if (!$dbdata) {
+            return [
+              'status' => 'fail',
+              'errors' => ['Database not found']
+            ];
+          }
+
+          config([
+              'database.connections.dynamic' => 
+              [
+                  'driver'    => $dbdata->database_driver,
+                  'host'      => $dbdata->database_host,
+                  'port'      => $dbdata->database_port,
+                  'database'  => $dbdata->database_name,
+                  'username'  => $dbdata->database_username,
+                  'password'  => $dbdata->database_password,
+                  'charset'   => 'utf8mb4',
+                  'collation' => 'utf8mb4_unicode_ci',
+                  'options' => [
+                      \PDO::ATTR_EMULATE_PREPARES => true,
+                  ],
+              ],
+          ]);
+
+          $reportParams['database'] = 'dynamic';
+          $reportParams['database_id'] = $request->database;
           $reportParams['query_input'] = $request->query_input;
         }
         elseif ($request->data_source === 'excel') {
@@ -387,7 +547,8 @@ class ReportController extends BaseController
     $report = Report::find($id);
     $data = json_decode($report->detail, true);
     $data['id'] = $report->id;
-    return view('report/builder', ['databases' => array_keys(config('database.connections')), 'data' => $data, 'editMode' => true]);
+    $databases = Database::select('id', 'name', 'database_name')->get();
+    return view('report/builder', ['databases' => $databases, 'data' => $data, 'editMode' => true]);
   }
 
   public function update(Request $request, $id) 
@@ -467,18 +628,40 @@ class ReportController extends BaseController
 
   public function getTablesFields(Request $request) 
   {
-    $dbConfig = config("database.connections.{$request->database}");
+    $database = Database::find($request->database);
+    if (!$database) {
+      return [
+        'status' => 'fail',
+        'errors' => ['Database not found']
+      ];
+    }
+
+    config([
+        'database.connections.dynamic' => 
+        [
+            'driver'    => $database->database_driver,
+            'host'      => $database->database_host,
+            'port'      => $database->database_port,
+            'database'  => $database->database_name,
+            'username'  => $database->database_username,
+            'password'  => $database->database_password,
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+        ],
+    ]);
+
+    $dbConfig = config('database.connections.dynamic');
     //$dbConfig = config("database.connections.vision_report");
     if ($dbConfig['driver'] === 'mysql') {
       
       //$query = "select * from information_schema.columns where table_schema = 'vision_report' order by table_name, ordinal_position;";
-      $query = "SELECT TABLE_SCHEMA, TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = '".$request->database."' ";
+      $query = "SELECT TABLE_SCHEMA, TABLE_NAME FROM information_schema.VIEWS WHERE TABLE_SCHEMA = '".$database->database_name."' ";
     }
     else if($dbConfig['driver'] === 'sqlsrv') {
       $query = "SELECT TABLE_NAME, COLUMN_NAME FROM '$request->database'.INFORMATION_SCHEMA.COLUMNS;";
     }
 
-    $result = DB::connection($request->database)->select($query);
+    $result = DB::connection('dynamic')->select($query);
     $tables = array_values(array_unique(array_map(function ($row) { 
       return $row->TABLE_NAME;
     }, $result)));
@@ -487,12 +670,12 @@ class ReportController extends BaseController
     
     foreach ($tables as $table) {
       
-      $query_column = "SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.columns where TABLE_SCHEMA = '".$request->database."' AND TABLE_NAME = '".$table."' order by table_name, ordinal_position;";
+      $query_column = "SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.columns where TABLE_SCHEMA = '".$database->database_name."' AND TABLE_NAME = '".$table."' order by table_name, ordinal_position;";
 
       //echo $query_column;
 
       
-      $result_column = DB::connection($request->database)->select($query_column);
+      $result_column = DB::connection('dynamic')->select($query_column);
 
       $fields = array_filter($result_column, function ($row) use ($table) {
         return $row->TABLE_NAME === $table;
@@ -515,10 +698,36 @@ class ReportController extends BaseController
 
   public function getQueryFields(Request $request)
   {
+    $dbdata = Database::find($request->database);
+    if (!$dbdata) {
+      return [
+        'status' => 'fail',
+        'errors' => ['Database not found']
+      ];
+    }
+
+    config([
+        'database.connections.dynamic' => 
+        [
+            'driver'    => $dbdata->database_driver,
+            'host'      => $dbdata->database_host,
+            'port'      => $dbdata->database_port,
+            'database'  => $dbdata->database_name,
+            'username'  => $dbdata->database_username,
+            'password'  => $dbdata->database_password,
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'options' => [
+                \PDO::ATTR_EMULATE_PREPARES => true,
+            ],
+        ],
+    ]);
+
+    $dbConfig = config('database.connections.dynamic');
     if ($request->query_type === 'builder') {
       $tables = $request->tables;
       $joinFields = $request->join_fields;
-      $database = $request->database;
+      $database = $dbdata->database_name;
       $joinTypes = $request->join_types;
       $selectedFields = $request->selected_fields;
       $aliasFields = $request->alias_fields;
@@ -528,7 +737,7 @@ class ReportController extends BaseController
       $condValues = $request->cond_values;
       $condTypes = $request->cond_types;
 
-      $builder = DB::connection($database)->table($tables[0]);
+      $builder = DB::connection('dynamic')->table($tables[0]);
       foreach ($selectedFields as $selectedField) {
         if ($request->has('alias_fields') && false !== $aliasIndex = array_search($selectedField, $aliasFields)) {
           $selectedField .= ' as ' . $aliasValues[$aliasIndex];
@@ -574,24 +783,24 @@ class ReportController extends BaseController
       //for vision report filtering data by user
       
       
-      if($database=="vision_report"){
-        $user_email = $request->user()->email;
-        //echo $user_email; 
-        //get all sensor id by user
-        $users = DB::connection('portal')->TABLE("users")->where('email', $user_email)->first();
-        $user_id = $users->id;
+      // if($database=="vision_report"){
+      //   $user_email = $request->user()->email;
+      //   //echo $user_email; 
+      //   //get all sensor id by user
+      //   $users = DB::connection('portal')->TABLE("users")->where('email', $user_email)->first();
+      //   $user_id = $users->id;
 
-        $sensors = DB::connection('portal')->SELECT("SELECT id FROM sensors WHERE user_id ='".$user_id."'");
+      //   $sensors = DB::connection('portal')->SELECT("SELECT id FROM sensors WHERE user_id ='".$user_id."'");
 
-        //var_dump($sensors);
+      //   //var_dump($sensors);
 
-        $builder->where(function($queryx) use ($sensors)
-        {
-          foreach($sensors as $sensor){
-              $queryx->orwhere('cam_id', $sensor->id);
-          }
-        });
-      }
+      //   $builder->where(function($queryx) use ($sensors)
+      //   {
+      //     foreach($sensors as $sensor){
+      //         $queryx->orwhere('cam_id', $sensor->id);
+      //     }
+      //   });
+      // }
       
       //
 
@@ -656,7 +865,7 @@ class ReportController extends BaseController
         //echo "found delete";
       } 
       else {
-        $result = DB::connection($request->database)->select($request->query_input);
+        $result = DB::connection('dynamic')->select($request->query_input);
         return (array) $result[0];
         //echo "is okay";
       }
