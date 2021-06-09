@@ -86,7 +86,7 @@
                   @endforeach
                 @else
                   @foreach ($databases as $database)
-                    <option value="{{ $database->id }}" {{ $database->id === $data['database'] ? 'selected' : '' }}>{{ $database->name ?: $database->database_name }}</option>
+                    <option value="{{ $database->id }}" {{ $database->id == $data['database'] ? 'selected' : '' }}>{{ $database->name ?: $database->database_name }}</option>
                   @endforeach
                 @endif
               </select>

@@ -703,6 +703,8 @@ function updateFields() {
       queryFields.forEach(field => {
         if (contains(field, ['count(', 'max(', 'min(', 'sum(', 'avg('])) {
           aggregateFields.push(field);
+        } else {
+          $(`input[type="checkbox"][value="${field}"]`).prop('checked', true);
         }
       });
       if (aggregateFields.length > 0) {
