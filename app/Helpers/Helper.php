@@ -64,4 +64,43 @@ class Helper
     {
         return ['apps', 'users', 'transactions'];
     }
+
+    public static function generateSafeColumnName($selectedField)
+    {
+        $exploadedSelectedField = explode(' as ', $selectedField);
+        if (strpos($exploadedSelectedField[0], '.')) {
+            $exploadedSelectedField[0] = implode(
+              '.', 
+              array_map(
+                function($item) {
+                  if (strpos('`', $item) === FALSE) {
+                    if (strpos($item, '(')) {
+                      $exploaded = explode('(', $item);
+                      $exploaded[1] = '`' . $exploaded[1] . '`';
+                      $item = implode('(', $exploaded);
+                    } elseif (strpos($item, ')')) {
+                      $exploaded = explode(')', $item);
+                      $exploaded[0] = '`' . $exploaded[0] . '`';
+                      $item = implode(')', $exploaded);
+                    } else {
+                        $item = '`' . $item . '`';
+                    }
+                  }
+                  return $item;
+                }, 
+                explode(
+                  '.', 
+                  $exploadedSelectedField[0]
+                )
+              )
+            );
+            if (count($exploadedSelectedField) > 1) {
+                $exploadedSelectedField[1] = '`' . $exploadedSelectedField[1] . '`';
+                $selectedField = implode(' as ', $exploadedSelectedField);
+            } else {
+                $selectedField = $exploadedSelectedField[0];
+            }
+        }
+        return $selectedField;
+    }
 }

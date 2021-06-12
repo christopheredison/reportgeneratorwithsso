@@ -220,16 +220,33 @@ $(document).ready(function() {
   $('#aggregateContainer').on('click', '.addBtn', function() {
     let func = $('#aggregateContainer').find('select[name="aggregate_function"]').val();
     let field = $('#aggregateContainer').find('select[name="aggregate_field"]').val();
-    if (!$('#queryFields').find("optgroup[label='aggregates']").length) {
-      $('#queryFields').append($('<optgroup />').attr('label', 'aggregates'));
+    if (!$('#select-field-container .row.row-aggregate').length) {
+      $('#select-field-container').append(`
+        <b>aggregates</b>
+        <div class="row row-aggregate"></div>
+        `);
     }
-    if (!$('#queryFields').find("option[value='" + func + "(" + field + ")']").length) {
-      $('#queryFields').find("optgroup[label='aggregates']").append($('<option />').val(func + '(' + field + ')').text(func + '(' + field + ')'));
+    if (!$('#select-field-container .row.row-aggregate').find(`input[value='${func}(${field})']`).length) {
+      const id = Math.floor(Math.random() * 1000) + 100;
+      $('#select-field-container .row.row-aggregate').append(`
+        <div class="col-md-6 col-sm-12 select-column">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="${func}(${field})" name="query_fields[]" id="checkboxSelect${id}" checked>
+            <label class="form-check-label" for="checkboxSelect${id}">
+              ${func}(${field})
+            </label>
+          </div>
+        </div>
+      `);
+      $($('#select-field-container input')[0]).change();
     }
-    let result = $('#queryFields').val();
-    result.push(func + '(' + field + ')');
-    $('#queryFields').val(result).trigger('change');
-    builder.setSelectedFields($('#queryFields').val());
+  });
+
+  $('#select-field-container').on('change', 'input', function() {
+    const selected = [];
+    $('#select-field-container input[type="checkbox"]:checked').map((index, field) => selected.push($(field).val()));
+    builder.setSelectedFields(selected);
+    $('#aliasContainer').empty();
   });
 
   $('#aliasBtn').click(function() {
@@ -682,7 +699,7 @@ function updateFields() {
     html.push(`<b>${table}</b><div class="row">`);
     $.each(fields, function(id, field) {
       html.push(`
-        <div class="col-md-3 col-sm-4">
+        <div class="col-md-3 col-sm-4 select-column">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" value="${table}.${field}" name="query_fields[]" id="checkboxSelect${id}">
             <label class="form-check-label" for="checkboxSelect${id}">
@@ -708,6 +725,28 @@ function updateFields() {
         }
       });
       if (aggregateFields.length > 0) {
+        if (!$('#select-field-container .row.row-aggregate').length) {
+          $('#select-field-container').append(`
+            <b>aggregates</b>
+            <div class="row row-aggregate"></div>
+            `);
+        }
+        aggregateFields.forEach(field => {
+          if (!$('#select-field-container .row.row-aggregate').find(`input[value='${field}']`).length) {
+            const id = Math.floor(Math.random() * 1000) + 100;
+            $('#select-field-container .row.row-aggregate').append(`
+              <div class="col-md-6 col-sm-12 select-column">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="${field}" name="query_fields[]" id="checkboxSelect${id}" checked>
+                  <label class="form-check-label" for="checkboxSelect${id}">
+                    ${field}
+                  </label>
+                </div>
+              </div>
+            `);
+            $($('#select-field-container input')[0]).change();
+          }
+        })
         let element = $('<optgroup />').attr('label', 'aggregates');
         aggregateFields.forEach(field => {
           element.append($('<option />').val(field).text(field));
@@ -716,19 +755,6 @@ function updateFields() {
       }
     }
   }
-  $('#queryFields').select2(({ width: '100%' }));
-  //Sort tags based on user input
-  $('#queryFields').on('select2:select', function (evt) {
-    var element = evt.params.data.element;
-    var $element = $(element);
-    
-    $element.detach();
-    $(this).append($element);
-    $(this).trigger('change');
-
-    builder.setSelectedFields($(this).val());
-    $('#aliasContainer').empty();
-  })
 
   $('#aliasContainer').empty();
   $('#conditionContainer').empty();

@@ -495,6 +495,7 @@ class ReportController extends BaseController
     }
     $report = new MyReport($reportParams);
     $report->run();
+    // dd($report);
     return view("report", ["report" => $report]);
   }
 
@@ -743,6 +744,7 @@ class ReportController extends BaseController
           $selectedField .= ' as ' . $aliasValues[$aliasIndex];
         }
         if (strpos($selectedField, 'count(') !== false || strpos($selectedField, 'max(') !== false || strpos($selectedField, 'min(') !== false || strpos($selectedField, 'avg(') !== false || strpos($selectedField, 'sum(') !== false) {
+          $selectedField = Helper::generateSafeColumnName($selectedField);
           $builder->addSelect(DB::raw($selectedField));
         }
         else {
@@ -811,7 +813,9 @@ class ReportController extends BaseController
         }
       }
       if ($request->has('having_fields')) {
-        $havingFields = $request->having_fields;
+        $havingFields = array_map(function ($item) {
+          return Helper::generateSafeColumnName($item);
+        }, $request->having_fields);
         $havingOperators = $request->having_operators;
         $havingValues = $request->having_values;
         $havingTypes = $request->having_types;
