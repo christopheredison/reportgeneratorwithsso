@@ -782,27 +782,47 @@ class ReportController extends BaseController
         }
       }
 
-      //for vision report filtering data by user
+      //for filtering data by user
       
       
-      // if($database=="vision_report"){
-      //   $user_email = $request->user()->email;
-      //   //echo $user_email; 
-      //   //get all sensor id by user
-      //   $users = DB::connection('portal')->TABLE("users")->where('email', $user_email)->first();
-      //   $user_id = $users->id;
-
-      //   $sensors = DB::connection('portal')->SELECT("SELECT id FROM sensors WHERE user_id ='".$user_id."'");
-
-      //   //var_dump($sensors);
-
-      //   $builder->where(function($queryx) use ($sensors)
-      //   {
-      //     foreach($sensors as $sensor){
-      //         $queryx->orwhere('cam_id', $sensor->id);
-      //     }
-      //   });
-      // }
+      if ($dbdata->extra_query) {
+        $extra_query = json_decode($dbdata->extra_query, true);
+        if (
+          ($extra_query['status'] ?? false) && 
+          ($extra_query['identifier'] ?? false) && 
+          ($extra_query['query'] ?? false)
+        ) {
+          $useDb2 = false;
+          if ($extra_query['connection'] ?? false) {
+            $dbdata2 = Database::find($extra_query['connection']);
+            if ($dbdata2) {
+              config([
+                  'database.connections.dynamic2' => 
+                  [
+                      'driver'    => $dbdata2->database_driver,
+                      'host'      => $dbdata2->database_host,
+                      'port'      => $dbdata2->database_port,
+                      'database'  => $dbdata2->database_name,
+                      'username'  => $dbdata2->database_username,
+                      'password'  => $dbdata2->database_password,
+                      'charset'   => 'utf8mb4',
+                      'collation' => 'utf8mb4_unicode_ci',
+                      'options' => [
+                          \PDO::ATTR_EMULATE_PREPARES => true,
+                      ],
+                  ],
+              ]);
+              $useDb2 = true;
+            }
+          }
+          $extra_query['query'] = str_replace('%email%', $request->user()->email, $extra_query['query']);
+          $result = DB::connection($useDb2 ? 'dynamic2' : 'dynamic')->select($extra_query['query']);
+          $result = array_map(function ($item) {
+            return (array) $item;
+          }, $result);
+          $builder->whereIn($extra_query['identifier'], array_merge(...$result));
+        }
+      }
       
       //
 

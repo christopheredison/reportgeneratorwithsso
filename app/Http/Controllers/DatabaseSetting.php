@@ -18,6 +18,9 @@ class DatabaseSetting extends Controller
      */
     public function index(Request $request)
     {
+        if ($request->for_select) {
+            return Database::select('id', 'name', 'database_name')->get();
+        }
         if ($request->wantsJson()) {
             $databases = (new Database)->newQuery();
 
@@ -144,6 +147,9 @@ class DatabaseSetting extends Controller
         if ($toCreate['database_password'] ?? false) {
             $toCreate['database_password'] = Crypt::encryptString($toCreate['database_password']);
         }
+        if ($toCreate['extra_query']['status'] ?? false) {
+            $toCreate['extra_query'] = json_encode($toCreate['extra_query']);
+        }
 
         $database = Database::create($toCreate);
         if ($database) {
@@ -184,6 +190,9 @@ class DatabaseSetting extends Controller
         $toUpdate = $request->all();
         if ($toUpdate['database_password'] ?? false) {
             $toUpdate['database_password'] = Crypt::encryptString($toUpdate['database_password']);
+        }
+        if ($toUpdate['extra_query']['status'] ?? false) {
+            $toUpdate['extra_query'] = json_encode($toUpdate['extra_query']);
         }
 
         $update = $database->update($toUpdate);

@@ -38,7 +38,13 @@
             database_host     : $(`${parentDiv} [name="database_host"]`).val(),
             database_port     : $(`${parentDiv} [name="database_port"]`).val(),
             database_username : $(`${parentDiv} [name="database_username"]`).val(),
-            database_password : $(`${parentDiv} [name="database_password"]`).val()
+            database_password : $(`${parentDiv} [name="database_password"]`).val(),
+            extra_query       : {
+                status      : $(`${parentDiv} [name="extra_query[status]"]`).val(),
+                identifier  : $(`${parentDiv} [name="extra_query[identifier]"]`).val(),
+                connection  : $(`${parentDiv} [name="extra_query[connection]"]`).val(),
+                query       : $(`${parentDiv} [name="extra_query[query]"]`).val()
+            }
         }
 
         if (source == 'edit') {
@@ -81,6 +87,7 @@
                 if (response.status == 'success') {
                     $(parentDiv).modal('hide');
                     $(parentDiv + ' :input').val('');
+                    $(parentDiv + ' [name="database_driver"]').val('mysql');
                     $('#table-database').DataTable().ajax.reload(null, false);
                     swal('Great!', 'Database saved', 'success');
                 } else {
@@ -113,6 +120,16 @@
         }
     }
 
+    function reloadDatabaseOption() {
+        $.get('{{url(route('database.index'))}}?for_select=1', function(response) {
+            const html = [
+                `<option value="0">This connection</option>`
+            ];
+            response.forEach(item => html.push(`<option value="${item.id}">${item.name ? item.name : item.database_name}</option>`));
+            $('[name="extra_query[connection]').html(html.join(''));
+        });
+    }
+
     function editDatabase(id) {
         $.blockUI();
         $.get('{{url(route('database.show', '::id::'))}}'.replace('::id::', id), function(response) {
@@ -125,6 +142,20 @@
                 $('#modal-edit-database [name="database_port"]').val(response.data?.database_port);
                 $('#modal-edit-database [name="database_username"]').val(response.data?.database_username);
                 $('#modal-edit-database [name="database_password"]').val(response.data?.database_password);
+                const extra_query = JSON.parse(response.data?.extra_query);
+                if (extra_query?.status) {
+                    $('#modal-edit-database [name="extra_query[status]"]').prop('checked', true).val('1');
+                    $('#modal-edit-database [name="extra_query[identifier]"]').val(extra_query.identifier);
+                    $('#modal-edit-database [name="extra_query[connection]"]').val(extra_query.connection);
+                    $('#modal-edit-database [name="extra_query[query]"]').val(extra_query.query);
+                } else {
+                    $('#modal-edit-database [name="extra_query[status]"]').prop('checked', false).val('1');
+                    $('#modal-edit-database [name="extra_query[status]"]').removeAttr('checked');
+                    $('#modal-edit-database [name="extra_query[identifier]"]').val('');
+                    $('#modal-edit-database [name="extra_query[connection]"]').val('');
+                    $('#modal-edit-database [name="extra_query[query]"]').val('');
+                }
+                $('#advance-filter-switch-edit').change();
                 $('#modal-edit-database').modal('show');
             } else {
                 swal('Oops!', (response.errors ? response.errors.join('. ') : 'Something went wrong'), 'error');
@@ -170,12 +201,26 @@
         });
     }
 
+    function updateAdvance(source, dom) {
+        const container = $(dom).parents('.modal').find('.advance-enabled-only');
+        if ($(dom).is(':checked')) {
+            container.find(':input').removeAttr('disabled');
+            container.show();
+        } else {
+            container.find(':input').prop('disabled', 'disabled');
+            container.hide();
+        }
+        return true;
+    }
+
     $(document).ready(function() {
+        $('#advance-filter-switch').change();
         $('#table-database').dataTable({
             ajax: {
                 url : "{{url()->current()}}",
                 type: 'GET',
                 data: function (data) {
+                    reloadDatabaseOption();
                     const info = $('#table-database').DataTable().page.info();
                     data.page = (info.start / info.length) + 1;
                 },

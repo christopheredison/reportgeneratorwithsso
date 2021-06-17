@@ -19,7 +19,7 @@
           <div class="form-group row">
             <label class="col-md-2 col-form-label">Driver <span class="text-danger">*</span></label>
             <div class="col-md-10">
-              <select class="form-control select2" name="database_driver">
+              <select class="form-control select2" name="database_driver" required>
                 <option value="mysql">MySQL</option>
                 <option value="sqlsrv">SQLSRV</option>
               </select>
@@ -52,6 +52,38 @@
             <div class="col-md-10">
               <input type="password" class="form-control" name="database_password" placeholder="Password" required>
               <small class="form-text text-muted">Leave blank if no password set for this database account</small>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-2 col-form-label">Advance Filter</label>
+            <div class="col-md-10">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" name="extra_query[status]" value="1" id="advance-filter-switch" onchange="updateAdvance('new', this)">
+                <label class="custom-control-label" for="advance-filter-switch">Enable/Disable</label>
+              </div>
+            </div>
+          </div>
+          <div class="advance-enabled-only">
+            <div class="form-group row">
+              <label class="col-md-2 col-form-label">Column Identifier <span class="text-danger">*</span></label>
+              <div class="col-md-4">
+                <input type="text" class="form-control" name="extra_query[identifier]" placeholder="Column name" required>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-2 col-form-label">Connection <span class="text-danger">*</span></label>
+              <div class="col-md-5">
+                <select class="form-control select2" name="extra_query[connection]" required>
+                  <option value="">This connection</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-2 col-form-label">Query to get allowed values <span class="text-danger">*</span></label>
+              <div class="col-md-10">
+                <textarea class="form-control" name="extra_query[query]" placeholder="Query" required></textarea>
+                <small class="form-text text-muted">use %email% to insert dinamic logged user's email</small>
+              </div>
             </div>
           </div>
         </form>
@@ -120,6 +152,38 @@
             <div class="col-md-10">
               <input type="password" class="form-control" name="database_password" placeholder="Password" required>
               <small class="form-text text-muted">Leave blank if no password set for this database account</small>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-2 col-form-label">Advance Filter</label>
+            <div class="col-md-10">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" name="extra_query[status]" value="1" id="advance-filter-switch-edit" onchange="updateAdvance('edit', this)">
+                <label class="custom-control-label" for="advance-filter-switch-edit">Enable/Disable</label>
+              </div>
+            </div>
+          </div>
+          <div class="advance-enabled-only">
+            <div class="form-group row">
+              <label class="col-md-2 col-form-label">Column Identifier <span class="text-danger">*</span></label>
+              <div class="col-md-4">
+                <input type="text" class="form-control" name="extra_query[identifier]" placeholder="Column name" required>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-2 col-form-label">Connection <span class="text-danger">*</span></label>
+              <div class="col-md-5">
+                <select class="form-control select2" name="extra_query[connection]">
+                  <option value="0">This connection</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-md-2 col-form-label">Query to get allowed values <span class="text-danger">*</span></label>
+              <div class="col-md-10">
+                <textarea class="form-control" name="extra_query[query]" placeholder="Query" required></textarea>
+                <small class="form-text text-muted">use %email% to insert dinamic logged user's email</small>
+              </div>
             </div>
           </div>
         </form>
