@@ -65,7 +65,7 @@
                 swal('Oops!', 'Connection can not be established. ' + (response.errors ? 'Errors: ' + response.errors.join('. ') : ''), 'error');
             }
         }).fail(function(response) {
-            swal('Oops!', 'Connection can not be established. ' + (response.responseJSON?.errors ? 'Errors: ' + response.responseJSON?.errors.join('. ') : ''), 'error');
+            swal('Oops!', response.responseJSON?.message ? response.responseJSON?.message : (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
             $.unblockUI();
         });
         $.unblockUI();
@@ -95,7 +95,7 @@
                 }
                 $.unblockUI();
             }).fail(function(response) {
-                swal('Oops!', (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
+                swal('Oops!', response.responseJSON?.message ? response.responseJSON?.message : (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
                 $.unblockUI();
             });
         } else {
@@ -114,7 +114,7 @@
                 }
                 $.unblockUI();
             }).fail(function(response) {
-                swal('Oops!', (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
+                swal('Oops!', response.responseJSON?.message ? response.responseJSON?.message : (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
                 $.unblockUI();
             });;
         }
@@ -162,7 +162,7 @@
             }
             $.unblockUI();
         }).fail(function(response) {
-            swal('Oops!', (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
+            swal('Oops!', response.responseJSON?.message ? response.responseJSON?.message : (response.responseJSON?.errors ? response.responseJSON?.errors.join('. ') : 'Something went wrong'), 'error');
             $.unblockUI();
         });
     }

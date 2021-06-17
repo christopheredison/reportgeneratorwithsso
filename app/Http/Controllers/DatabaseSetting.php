@@ -83,7 +83,7 @@ class DatabaseSetting extends Controller
             $request->database_driver,
             $request->database_host,
             $request->database_port,
-            $request->database_database,
+            $request->database_name,
             $request->database_username,
             $request->database_password
         );
@@ -110,7 +110,7 @@ class DatabaseSetting extends Controller
             $request->database_driver,
             $request->database_host,
             $request->database_port,
-            $request->database_database,
+            $request->database_name,
             $request->database_username,
             $request->database_password
         );
@@ -132,7 +132,7 @@ class DatabaseSetting extends Controller
             $request->database_driver,
             $request->database_host,
             $request->database_port,
-            $request->database_database,
+            $request->database_name,
             $request->database_username,
             $request->database_password
         );
@@ -187,6 +187,22 @@ class DatabaseSetting extends Controller
      */
     public function update(Update $request, Database $database)
     {
+        $testResult = Helper::testDatabaseConnection(
+            $request->database_driver,
+            $request->database_host,
+            $request->database_port,
+            $request->database_name,
+            $request->database_username,
+            $request->database_password
+        );
+
+        if (!$testResult) {
+            return [
+                'status' => 'fail',
+                'errors' => ['Cannot connect to database']
+            ];
+        }
+
         $toUpdate = $request->all();
         if ($toUpdate['database_password'] ?? false) {
             $toUpdate['database_password'] = Crypt::encryptString($toUpdate['database_password']);

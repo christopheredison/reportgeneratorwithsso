@@ -47,7 +47,39 @@ class Helper
      */
     public static function testDatabaseConnection($driver, $host, $port, $database, $username, $password) : bool
     {
-        return true;
+        config([
+            'database.connections.dynamic' => 
+            [
+                'driver'    => $driver,
+                'host'      => $host,
+                'port'      => $port,
+                'database'  => $database,
+                'username'  => $username,
+                'password'  => $password,
+                'charset'   => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+            ],
+        ]);
+
+        $dbConfig = config('database.connections.dynamic');
+        //$dbConfig = config("database.connections.vision_report");
+        if ($dbConfig['driver'] === 'mysql') {
+          
+          //$query = "select * from information_schema.columns where table_schema = 'vision_report' order by table_name, ordinal_position;";
+          $query = "SHOW TABLES FROM $database";
+        }
+        else if($dbConfig['driver'] === 'sqlsrv') {
+          $query = "SELECT TABLE_NAME, COLUMN_NAME FROM '$database'.INFORMATION_SCHEMA.COLUMNS;";
+        }
+
+        try {
+            $result = \DB::connection('dynamic')->select($query);
+            \Log::debug($result);
+            return true;
+        } catch(\Exception $e) {
+            throw $e;
+            return false;
+        }
     }
 
     /**
