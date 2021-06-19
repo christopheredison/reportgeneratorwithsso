@@ -23,6 +23,13 @@ use Auth;
 class ReportController extends BaseController
 {
 
+  public function __construct()
+  {
+    config([
+        'global.onedrive.redirect_uri' => route('onedrive_redirect')
+    ]);
+  }
+
   /**
    * Show the application dashboard.
    *

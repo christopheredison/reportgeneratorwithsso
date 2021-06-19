@@ -47,7 +47,7 @@ Route::get('/', function() {
 	return redirect('home');
 })->name('root');
 
-Route::get('/onedrive/redirect', [OnedriveController::class, 'redirect']);
+Route::get('/onedrive/redirect', [OnedriveController::class, 'redirect'])->name('onedrive_redirect');
 Route::get('/onedrive/test', [OnedriveController::class, 'test']);
 
 
