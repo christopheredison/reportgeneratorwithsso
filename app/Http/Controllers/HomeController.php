@@ -27,10 +27,8 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        //return redirect('reports');
-        //$user_id = Auth::user()->id;
-        //echo $user_id;
-        return view('home');
+        $user = $request->user();
+        return view('home', compact('user'));
     }
 
     public function loginSSO($email, $password, $page)

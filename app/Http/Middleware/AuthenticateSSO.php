@@ -20,7 +20,7 @@ class AuthenticateSSO
     {
         $token = session('jwt_token');
         if (!$token) {
-            return redirect(route('login'));
+            return response(view('need_login'));
         }
 
         $client = new Client();
@@ -30,7 +30,7 @@ class AuthenticateSSO
                 config('identity_provider.validation_url'), 
                 [
                     'headers' => [
-                        'Authorization' => "Bearer $request->token",
+                        'Authorization' => "Bearer $token",
                         'Accept'        => 'application/json'
                     ],
                 ],

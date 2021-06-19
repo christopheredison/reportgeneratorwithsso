@@ -42,8 +42,9 @@ Route::middleware(['auth_sso'])->group(function() {
 });
 
 Route::get('login',[AuthSSO::class, 'login'])->name('login');
+Route::get('logout', [AuthSSO::class, 'logout'])->name('logout');
 Route::get('/', function() {
-	return redirect('login');
+	return redirect('home');
 })->name('root');
 
 Route::get('/onedrive/redirect', [OnedriveController::class, 'redirect']);
