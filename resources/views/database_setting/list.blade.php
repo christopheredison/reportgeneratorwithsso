@@ -87,6 +87,7 @@
                 if (response.status == 'success') {
                     $(parentDiv).modal('hide');
                     $(parentDiv + ' :input').val('');
+                    $(parentDiv + ' input[type="checkbox"]').val('1');
                     $(parentDiv + ' [name="database_driver"]').val('mysql');
                     $('#table-database').DataTable().ajax.reload(null, false);
                     swal('Great!', 'Database saved', 'success');
@@ -107,6 +108,7 @@
                 if (response.status == 'success') {
                     $(parentDiv).modal('hide');
                     $(parentDiv + ' :input').val('');
+                    $(parentDiv + ' input[type="checkbox"]').val('1');
                     $('#table-database').DataTable().ajax.reload(null, false);
                     swal('Great!', 'Database saved', 'success');
                 } else {
@@ -147,12 +149,14 @@
                     $('#modal-edit-database [name="extra_query[status]"]').prop('checked', true).val('1');
                     $('#modal-edit-database [name="extra_query[identifier]"]').val(extra_query.identifier);
                     $('#modal-edit-database [name="extra_query[connection]"]').val(extra_query.connection);
+                    $('#modal-edit-database [name="extra_query[connection]"]').select2();
                     $('#modal-edit-database [name="extra_query[query]"]').val(extra_query.query);
                 } else {
                     $('#modal-edit-database [name="extra_query[status]"]').prop('checked', false).val('1');
                     $('#modal-edit-database [name="extra_query[status]"]').removeAttr('checked');
                     $('#modal-edit-database [name="extra_query[identifier]"]').val('');
                     $('#modal-edit-database [name="extra_query[connection]"]').val('');
+                    $('#modal-edit-database [name="extra_query[connection]"]').select2();
                     $('#modal-edit-database [name="extra_query[query]"]').val('');
                 }
                 $('#advance-filter-switch-edit').change();

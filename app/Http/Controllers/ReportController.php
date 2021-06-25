@@ -825,9 +825,9 @@ class ReportController extends BaseController
           $extra_query['query'] = str_replace('%email%', $request->user()->email, $extra_query['query']);
           $result = DB::connection($useDb2 ? 'dynamic2' : 'dynamic')->select($extra_query['query']);
           $result = array_map(function ($item) {
-            return (array) $item;
+            return $item->id;
           }, $result);
-          $builder->whereIn($extra_query['identifier'], array_merge(...$result));
+          $builder->whereIn($extra_query['identifier'], $result);
         }
       }
       
