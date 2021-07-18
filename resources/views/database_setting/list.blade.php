@@ -35,9 +35,12 @@
 <script type="text/javascript">
     function getConnectionData(source) {
         let parentDiv;
+        let totalAdvanceFilter;
         if (source == 'new') {
+            totalAdvanceFilter = advanceFilterKeyNew;
             parentDiv = '#modal-new-database';
         } else {
+            totalAdvanceFilter = advanceFilterKey;
             parentDiv = '#modal-edit-database';
         }
 
@@ -49,11 +52,21 @@
             database_port     : $(`${parentDiv} [name="database_port"]`).val(),
             database_username : $(`${parentDiv} [name="database_username"]`).val(),
             database_password : $(`${parentDiv} [name="database_password"]`).val(),
-            extra_query       : {
-                status      : $(`${parentDiv} [name="extra_query[status]"]`).val(),
-                identifier  : $(`${parentDiv} [name="extra_query[identifier]"]`).val(),
-                connection  : $(`${parentDiv} [name="extra_query[connection]"]`).val(),
-                query       : $(`${parentDiv} [name="extra_query[query]"]`).val()
+            extra_query       : []
+        }
+
+        if (totalAdvanceFilter) {
+            for (let i = 0; i <= totalAdvanceFilter; i++) {
+                const identifier = $(`${parentDiv} [name="extra_query[${i}][identifier]"]`).val();
+                const connection = $(`${parentDiv} [name="extra_query[${i}][connection]"]`).val();
+                const query = $(`${parentDiv} [name="extra_query[${i}][query]"]`).val();
+                if (identifier && query) {
+                    result.extra_query.push({
+                        identifier: identifier,
+                        connection: connection ? connection : null,
+                        query: query
+                    });
+                }
             }
         }
 

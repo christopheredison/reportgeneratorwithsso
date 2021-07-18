@@ -21,7 +21,6 @@ class Database extends Model
         'database_port',
         'database_username',
         'database_password',
-        'extra_query',
     ];
 
     public function getDatabasePasswordAttribute($value)

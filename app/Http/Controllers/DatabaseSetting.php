@@ -147,12 +147,20 @@ class DatabaseSetting extends Controller
         if ($toCreate['database_password'] ?? false) {
             $toCreate['database_password'] = Crypt::encryptString($toCreate['database_password']);
         }
-        if ($toCreate['extra_query']['status'] ?? false) {
-            $toCreate['extra_query'] = json_encode($toCreate['extra_query']);
-        }
 
         $database = Database::create($toCreate);
         if ($database) {
+            if ($toCreate['extra_query']) {
+                foreach ($toCreate['extra_query'] as $extra) {
+                    if (($extra['identifier'] ?? false) && ($extra['query'] ?? false)) {
+                        $database->databaseFilter()->create([
+                            'identifier' => $extra['identifier'],
+                            'connection' => $extra['connection'] ?: null,
+                            'query' => $extra['query']
+                        ]);
+                    }
+                }
+            }
             return [
                 'status' => 'success',
                 'data'   => $database
@@ -209,11 +217,12 @@ class DatabaseSetting extends Controller
             $toUpdate['database_password'] = Crypt::encryptString($toUpdate['database_password']);
         }
 
+        $database->databaseFilter()->delete();
         if ($toUpdate['extra_query']) {
             foreach ($toUpdate['extra_query'] as $extra) {
                 if (($extra['identifier'] ?? false) && ($extra['query'] ?? false)) {
                     $database->databaseFilter()->create([
-                        'column_identifier' => $extra['identifier'],
+                        'identifier' => $extra['identifier'],
                         'connection' => $extra['connection'] ?: null,
                         'query' => $extra['query']
                     ]);
