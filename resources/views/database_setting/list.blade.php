@@ -1,5 +1,15 @@
 @extends('layouts.main')
 
+@section('style')
+<style type="text/css">
+.remove-filter-btn {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+}
+</style>
+@endsection
+
 @section('content')
     <div class="my-2">
         <button class="btn btn-primary" data-toggle="modal" data-target="#modal-new-database">Add new database</button>
@@ -122,14 +132,24 @@
         }
     }
 
-    function reloadDatabaseOption() {
-        $.get('{{url(route('database.index'))}}?for_select=1', function(response) {
+    let availableConnection = [];
+    function reloadDatabaseOption(dom) {
+        if (!dom) {
+            $.get('{{url(route('database.index'))}}?for_select=1', function(response) {
+                const html = [
+                    `<option value="0">This connection</option>`
+                ];
+                availableConnection = response;
+                response.forEach(item => html.push(`<option value="${item.id}">${item.name ? item.name : item.database_name}</option>`));
+                $('.advance-filter-item select').html(html.join(''));
+            });
+        } else {
             const html = [
                 `<option value="0">This connection</option>`
             ];
-            response.forEach(item => html.push(`<option value="${item.id}">${item.name ? item.name : item.database_name}</option>`));
-            $('[name="extra_query[connection]').html(html.join(''));
-        });
+            availableConnection.forEach(item => html.push(`<option value="${item.id}">${item.name ? item.name : item.database_name}</option>`));
+            $(dom).find('select').html(html.join(''));
+        }
     }
 
     function editDatabase(id) {
@@ -215,6 +235,64 @@
             container.hide();
         }
         return true;
+    }
+
+    let advanceFilterKey = 0;
+    let advanceFilterKeyNew = 0;
+    function addAdvanceFilter(source, dom) {
+        if (source == 'new') {
+            advanceFilterKeyNew++;
+        } else {
+            advanceFilterKey++;
+        }
+        const container = $(dom).parents('.modal').find('.advance-enabled-only .advance-filter-container');
+        const template = `
+          <div class="card mb-3 advance-filter-item advance-filter-${source}-${source == 'new' ? advanceFilterKeyNew : advanceFilterKey}">
+            <div class="card-body">
+              <button class="btn btn-danger remove-filter-btn" type="button" onclick="removeFilter(this)">Remove</button>
+              <div class="form-group row">
+                <label class="col-md-2 col-form-label">Column Identifier <span class="text-danger">*</span></label>
+                <div class="col-md-4">
+                  <input type="text" class="form-control" name="extra_query[${source == 'new' ? advanceFilterKeyNew : advanceFilterKey}][identifier]" placeholder="Column name" required>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-2 col-form-label">Connection <span class="text-danger">*</span></label>
+                <div class="col-md-5">
+                  <select class="form-control select2" name="extra_query[${source == 'new' ? advanceFilterKeyNew : advanceFilterKey}][connection]">
+                    <option value="0">This connection</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-md-2 col-form-label">Query to get allowed values <span class="text-danger">*</span></label>
+                <div class="col-md-10">
+                  <textarea class="form-control" name="extra_query[${source == 'new' ? advanceFilterKeyNew : advanceFilterKey}][query]" placeholder="Query" required></textarea>
+                  <small class="form-text text-muted">use %email% to insert dinamic logged user's email</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.append(template);
+        reloadDatabaseOption(`.advance-filter-${source}-${source == 'new' ? advanceFilterKeyNew : advanceFilterKey}`);
+    }
+
+    function removeFilter(dom) {
+        swal({
+            title: "Are you sure?",
+            text: "Once deleted, you will not be able to recover this configuration data!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true
+        })
+        .then((willDelete) => {
+            if (willDelete) {
+                $(dom).parents('.advance-filter-item').remove();
+                swal('Removed', 'Filter removed successfully', 'success');
+            }
+        });
     }
 
     $(document).ready(function() {

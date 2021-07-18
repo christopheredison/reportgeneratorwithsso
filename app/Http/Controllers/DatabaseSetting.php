@@ -172,6 +172,7 @@ class DatabaseSetting extends Controller
      */
     public function show(Database $database)
     {
+        $database->load('databaseFilter');
         return [
             'status' => 'success',
             'data' => $database
@@ -207,8 +208,17 @@ class DatabaseSetting extends Controller
         if ($toUpdate['database_password'] ?? false) {
             $toUpdate['database_password'] = Crypt::encryptString($toUpdate['database_password']);
         }
-        if ($toUpdate['extra_query']['status'] ?? false) {
-            $toUpdate['extra_query'] = json_encode($toUpdate['extra_query']);
+
+        if ($toUpdate['extra_query']) {
+            foreach ($toUpdate['extra_query'] as $extra) {
+                if (($extra['identifier'] ?? false) && ($extra['query'] ?? false)) {
+                    $database->databaseFilter()->create([
+                        'column_identifier' => $extra['identifier'],
+                        'connection' => $extra['connection'] ?: null,
+                        'query' => $extra['query']
+                    ]);
+                }
+            }
         }
 
         $update = $database->update($toUpdate);

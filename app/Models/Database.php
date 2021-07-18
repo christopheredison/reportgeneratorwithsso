@@ -32,4 +32,9 @@ class Database extends Model
             return null;
         }
     }
+
+    public function databaseFilter()
+    {
+        return $this->hasMany(DatabaseFilter::class, 'database_id');
+    }
 }

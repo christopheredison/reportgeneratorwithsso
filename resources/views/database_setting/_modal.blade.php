@@ -64,26 +64,10 @@
             </div>
           </div>
           <div class="advance-enabled-only">
-            <div class="form-group row">
-              <label class="col-md-2 col-form-label">Column Identifier <span class="text-danger">*</span></label>
-              <div class="col-md-4">
-                <input type="text" class="form-control" name="extra_query[identifier]" placeholder="Column name" required>
-              </div>
+            <div class="advance-filter-container">
             </div>
-            <div class="form-group row">
-              <label class="col-md-2 col-form-label">Connection <span class="text-danger">*</span></label>
-              <div class="col-md-5">
-                <select class="form-control select2" name="extra_query[connection]" required>
-                  <option value="">This connection</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label class="col-md-2 col-form-label">Query to get allowed values <span class="text-danger">*</span></label>
-              <div class="col-md-10">
-                <textarea class="form-control" name="extra_query[query]" placeholder="Query" required></textarea>
-                <small class="form-text text-muted">use %email% to insert dinamic logged user's email</small>
-              </div>
+            <div class="text-center">
+              <button class="btn btn-primary" type="button" onclick="addAdvanceFilter('new', this)">Add Filter</button>
             </div>
           </div>
         </form>
@@ -164,26 +148,10 @@
             </div>
           </div>
           <div class="advance-enabled-only">
-            <div class="form-group row">
-              <label class="col-md-2 col-form-label">Column Identifier <span class="text-danger">*</span></label>
-              <div class="col-md-4">
-                <input type="text" class="form-control" name="extra_query[identifier]" placeholder="Column name" required>
-              </div>
+            <div class="advance-filter-container">
             </div>
-            <div class="form-group row">
-              <label class="col-md-2 col-form-label">Connection <span class="text-danger">*</span></label>
-              <div class="col-md-5">
-                <select class="form-control select2" name="extra_query[connection]">
-                  <option value="0">This connection</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label class="col-md-2 col-form-label">Query to get allowed values <span class="text-danger">*</span></label>
-              <div class="col-md-10">
-                <textarea class="form-control" name="extra_query[query]" placeholder="Query" required></textarea>
-                <small class="form-text text-muted">use %email% to insert dinamic logged user's email</small>
-              </div>
+            <div class="text-center">
+              <button class="btn btn-primary" type="button" onclick="addAdvanceFilter('edit', this)">Add Filter</button>
             </div>
           </div>
         </form>
