@@ -220,16 +220,33 @@ $(document).ready(function() {
   $('#aggregateContainer').on('click', '.addBtn', function() {
     let func = $('#aggregateContainer').find('select[name="aggregate_function"]').val();
     let field = $('#aggregateContainer').find('select[name="aggregate_field"]').val();
-    if (!$('#queryFields').find("optgroup[label='aggregates']").length) {
-      $('#queryFields').append($('<optgroup />').attr('label', 'aggregates'));
+    if (!$('#select-field-container .row.row-aggregate').length) {
+      $('#select-field-container').append(`
+        <b>aggregates</b>
+        <div class="row row-aggregate"></div>
+        `);
     }
-    if (!$('#queryFields').find("option[value='" + func + "(" + field + ")']").length) {
-      $('#queryFields').find("optgroup[label='aggregates']").append($('<option />').val(func + '(' + field + ')').text(func + '(' + field + ')'));
+    if (!$('#select-field-container .row.row-aggregate').find(`input[value='${func}(${field})']`).length) {
+      const id = Math.floor(Math.random() * 1000) + 100;
+      $('#select-field-container .row.row-aggregate').append(`
+        <div class="col-md-6 col-sm-12 select-column">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="${func}(${field})" name="query_fields[]" id="checkboxSelect${id}" checked>
+            <label class="form-check-label" for="checkboxSelect${id}">
+              ${func}(${field})
+            </label>
+          </div>
+        </div>
+      `);
+      $($('#select-field-container input')[0]).change();
     }
-    let result = $('#queryFields').val();
-    result.push(func + '(' + field + ')');
-    $('#queryFields').val(result).trigger('change');
-    builder.setSelectedFields($('#queryFields').val());
+  });
+
+  $('#select-field-container').on('change', 'input', function() {
+    const selected = [];
+    $('#select-field-container input[type="checkbox"]:checked').map((index, field) => selected.push($(field).val()));
+    builder.setSelectedFields(selected);
+    $('#aliasContainer').empty();
   });
 
   $('#aliasBtn').click(function() {
@@ -664,7 +681,7 @@ function checkQueryType() {
 }
 
 function updateFields() {
-  $('#queryFields').empty();
+  $('#select-field-container').html('');
   let selectedTables = {};
   if ($('.joinTable')[0]) {
     let tables = $('#joinTableContainer').find('select[name*=join_table_]');
@@ -677,13 +694,24 @@ function updateFields() {
     selectedTables[$('#table').val()] = builder.getTableFields($('#table').val());
   }
   builder.setSelectedTables(selectedTables);
+  const html = [];
   $.each(selectedTables, function(table, fields) {
-    let element = $('<optgroup />').attr('label', table);
-    $.each(fields, function() {
-      element.append($('<option />').val(table + '.' + this).text(table + '.' + this));
+    html.push(`<b>${table}</b><div class="row">`);
+    $.each(fields, function(id, field) {
+      html.push(`
+        <div class="col-md-3 col-sm-4 select-column">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="${table}.${field}" name="query_fields[]" id="checkboxSelect${id}">
+            <label class="form-check-label" for="checkboxSelect${id}">
+              ${field}
+            </label>
+          </div>
+        </div>
+      `);
     });
-    $('#queryFields').append(element);
+    html.push(`</div>`);
   });
+  $('#select-field-container').html(html.join(''));
   if ($('input[name="data"]')[0]) {
     let data = JSON.parse($('input[name="data"]').val());
     if ('query_fields' in data) {
@@ -692,9 +720,33 @@ function updateFields() {
       queryFields.forEach(field => {
         if (contains(field, ['count(', 'max(', 'min(', 'sum(', 'avg('])) {
           aggregateFields.push(field);
+        } else {
+          $(`input[type="checkbox"][value="${field}"]`).prop('checked', true);
         }
       });
       if (aggregateFields.length > 0) {
+        if (!$('#select-field-container .row.row-aggregate').length) {
+          $('#select-field-container').append(`
+            <b>aggregates</b>
+            <div class="row row-aggregate"></div>
+            `);
+        }
+        aggregateFields.forEach(field => {
+          if (!$('#select-field-container .row.row-aggregate').find(`input[value='${field}']`).length) {
+            const id = Math.floor(Math.random() * 1000) + 100;
+            $('#select-field-container .row.row-aggregate').append(`
+              <div class="col-md-6 col-sm-12 select-column">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="${field}" name="query_fields[]" id="checkboxSelect${id}" checked>
+                  <label class="form-check-label" for="checkboxSelect${id}">
+                    ${field}
+                  </label>
+                </div>
+              </div>
+            `);
+            $($('#select-field-container input')[0]).change();
+          }
+        })
         let element = $('<optgroup />').attr('label', 'aggregates');
         aggregateFields.forEach(field => {
           element.append($('<option />').val(field).text(field));
@@ -703,19 +755,6 @@ function updateFields() {
       }
     }
   }
-  $('#queryFields').select2(({ width: '100%' }));
-  //Sort tags based on user input
-  $('#queryFields').on('select2:select', function (evt) {
-    var element = evt.params.data.element;
-    var $element = $(element);
-    
-    $element.detach();
-    $(this).append($element);
-    $(this).trigger('change');
-
-    builder.setSelectedFields($(this).val());
-    $('#aliasContainer').empty();
-  })
 
   $('#aliasContainer').empty();
   $('#conditionContainer').empty();
@@ -738,7 +777,8 @@ async function getQueryBuilderFields() {
     }
   });
 
-  let selectedFields = $('select[name="query_fields[]"]').val();
+  const selectedFields = Object.values($('input[name="query_fields[]"]:checked').map((idx,dom) => $(dom).val())).filter(item => typeof(item) === 'string');
+  // let selectedFields = $('input[name="query_fields[]"]').val();
   if (!selectedFields.length) {
     swal('Warning', 'Please select fields', 'warning');
     isValid = false;

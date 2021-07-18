@@ -12,7 +12,9 @@ class OnedriveController extends BaseController
             $request->session()->put('access_token', $request->access_token);
             return redirect()->away($request->session()->get('return_url'));
         }
-        else {
+        elseif ($request->has('error')) {
+            return $request->all();
+        } else {
             return view('redirect');
         }
     }
