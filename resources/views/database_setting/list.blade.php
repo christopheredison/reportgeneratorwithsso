@@ -110,6 +110,8 @@
                 if (response.status == 'success') {
                     $(parentDiv).modal('hide');
                     $(parentDiv + ' :input').val('');
+                    $(parentDiv + ' .advance-filter-container').html('');
+                    advanceFilterKeyNew = 0;
                     $(parentDiv + ' input[type="checkbox"]').val('1');
                     $(parentDiv + ' [name="database_driver"]').val('mysql');
                     $('#table-database').DataTable().ajax.reload(null, false);
@@ -177,20 +179,52 @@
                 $('#modal-edit-database [name="database_port"]').val(response.data?.database_port);
                 $('#modal-edit-database [name="database_username"]').val(response.data?.database_username);
                 $('#modal-edit-database [name="database_password"]').val(response.data?.database_password);
-                const extra_query = JSON.parse(response.data?.extra_query);
-                if (extra_query?.status) {
+                const database_filter = response.data?.database_filter;
+                if (!!database_filter?.length) {
                     $('#modal-edit-database [name="extra_query[status]"]').prop('checked', true).val('1');
-                    $('#modal-edit-database [name="extra_query[identifier]"]').val(extra_query.identifier);
-                    $('#modal-edit-database [name="extra_query[connection]"]').val(extra_query.connection);
-                    $('#modal-edit-database [name="extra_query[connection]"]').select2();
-                    $('#modal-edit-database [name="extra_query[query]"]').val(extra_query.query);
+
+                    const htmls = [];
+                    database_filter.forEach((item, index) => {
+                        const template = `
+                          <div class="card mb-3 advance-filter-item advance-filter-edit-${index}">
+                            <div class="card-body">
+                              <button class="btn btn-danger remove-filter-btn" type="button" onclick="removeFilter(this)">Remove</button>
+                              <div class="form-group row">
+                                <label class="col-md-2 col-form-label">Column Identifier <span class="text-danger">*</span></label>
+                                <div class="col-md-4">
+                                  <input type="text" class="form-control" name="extra_query[${index}][identifier]" placeholder="Column name" required value="${item.identifier}">
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-2 col-form-label">Connection <span class="text-danger">*</span></label>
+                                <div class="col-md-5">
+                                  <select class="form-control select2" name="extra_query[${index}][connection]">
+                                    <option value="0">This connection</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label class="col-md-2 col-form-label">Query to get allowed values <span class="text-danger">*</span></label>
+                                <div class="col-md-10">
+                                  <textarea class="form-control" name="extra_query[${index}][query]" placeholder="Query" required>${item.query}</textarea>
+                                  <small class="form-text text-muted">use %email% to insert dinamic logged user's email</small>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        `;
+                        advanceFilterKey = index;
+                        htmls.push(template);
+                    })
+                    $('#modal-edit-database .advance-filter-container').html(htmls.join(''));
+
+                    database_filter.forEach((item, index) => {
+                        reloadDatabaseOption(`.advance-filter-edit-${index}`);
+                        $(`.advance-filter-edit-${index} select[name="extra_query[${index}][connection]"]`).val(item.connection ? item.connection : '0');
+                    })
                 } else {
                     $('#modal-edit-database [name="extra_query[status]"]').prop('checked', false).val('1');
-                    $('#modal-edit-database [name="extra_query[status]"]').removeAttr('checked');
-                    $('#modal-edit-database [name="extra_query[identifier]"]').val('');
-                    $('#modal-edit-database [name="extra_query[connection]"]').val('');
-                    $('#modal-edit-database [name="extra_query[connection]"]').select2();
-                    $('#modal-edit-database [name="extra_query[query]"]').val('');
+                    $('#modal-edit-database .advance-filter-container').html('');
                 }
                 $('#advance-filter-switch-edit').change();
                 $('#modal-edit-database').modal('show');
