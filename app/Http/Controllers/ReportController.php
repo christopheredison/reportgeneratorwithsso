@@ -706,7 +706,7 @@ class ReportController extends BaseController
 
   public function getQueryFields(Request $request)
   {
-    $dbdata = Database::find($request->database);
+    $dbdata = Database::with('databaseFilter')->find($request->database);
     if (!$dbdata) {
       return [
         'status' => 'fail',
@@ -791,43 +791,42 @@ class ReportController extends BaseController
 
       //for filtering data by user
       
-      
-      if ($dbdata->extra_query) {
-        $extra_query = json_decode($dbdata->extra_query, true);
-        if (
-          ($extra_query['status'] ?? false) && 
-          ($extra_query['identifier'] ?? false) && 
-          ($extra_query['query'] ?? false)
-        ) {
-          $useDb2 = false;
-          if ($extra_query['connection'] ?? false) {
-            $dbdata2 = Database::find($extra_query['connection']);
-            if ($dbdata2) {
-              config([
-                  'database.connections.dynamic2' => 
-                  [
-                      'driver'    => $dbdata2->database_driver,
-                      'host'      => $dbdata2->database_host,
-                      'port'      => $dbdata2->database_port,
-                      'database'  => $dbdata2->database_name,
-                      'username'  => $dbdata2->database_username,
-                      'password'  => $dbdata2->database_password,
-                      'charset'   => 'utf8mb4',
-                      'collation' => 'utf8mb4_unicode_ci',
-                      'options' => [
-                          \PDO::ATTR_EMULATE_PREPARES => true,
-                      ],
-                  ],
-              ]);
-              $useDb2 = true;
+      if ($dbdata->databaseFilter) {
+        foreach ($dbdata->databaseFilter as $extra_query) {
+          if (
+            ($extra_query['identifier'] ?? false) && 
+            ($extra_query['query'] ?? false)
+          ) {
+            $useDb2 = false;
+            if ($extra_query['connection'] ?? false) {
+              $dbdata2 = Database::find($extra_query['connection']);
+              if ($dbdata2) {
+                config([
+                    'database.connections.dynamic2' => 
+                    [
+                        'driver'    => $dbdata2->database_driver,
+                        'host'      => $dbdata2->database_host,
+                        'port'      => $dbdata2->database_port,
+                        'database'  => $dbdata2->database_name,
+                        'username'  => $dbdata2->database_username,
+                        'password'  => $dbdata2->database_password,
+                        'charset'   => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'options' => [
+                            \PDO::ATTR_EMULATE_PREPARES => true,
+                        ],
+                    ],
+                ]);
+                $useDb2 = true;
+              }
             }
+            $extra_query['query'] = str_replace('%email%', $request->user()->email, $extra_query['query']);
+            $result = DB::connection($useDb2 ? 'dynamic2' : 'dynamic')->select($extra_query['query']);
+            $result = array_map(function ($item) {
+              return $item->id;
+            }, $result);
+            $builder->whereIn($extra_query['identifier'], $result);
           }
-          $extra_query['query'] = str_replace('%email%', $request->user()->email, $extra_query['query']);
-          $result = DB::connection($useDb2 ? 'dynamic2' : 'dynamic')->select($extra_query['query']);
-          $result = array_map(function ($item) {
-            return $item->id;
-          }, $result);
-          $builder->whereIn($extra_query['identifier'], $result);
         }
       }
       

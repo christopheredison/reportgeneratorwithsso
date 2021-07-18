@@ -74,7 +74,6 @@ class Helper
 
         try {
             $result = \DB::connection('dynamic')->select($query);
-            \Log::debug($result);
             return true;
         } catch(\Exception $e) {
             throw $e;

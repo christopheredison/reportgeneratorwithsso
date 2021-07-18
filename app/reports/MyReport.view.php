@@ -108,7 +108,6 @@ use \koolreport\widgets\google\Histogram;
           }
           else {
             $dataSource = function() {
-              \Log::debug($this->params['query_input']);
               return $this->src($this->params['database'])->query($this->params['query_input']);
             };
             $serverSide = true;
